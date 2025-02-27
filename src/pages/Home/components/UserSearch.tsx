@@ -1,48 +1,35 @@
-import React, { useState } from 'react';
-import { api } from "../../../services/api";
+import React, { useState, useContext } from 'react';
+import { GithubContext } from "../../../context/GithubContext";
 import { UserCard } from "./UserCard";
 
-interface User {
-    id: number;
-    login: string;
-    avatar_url: string;
-}
 
 interface UserSearchProps {
     setAlert: (msg: string, type: string) => void;
 }
 
-export function UserSearch({ setAlert }: UserSearchProps) {
+export function UserSearch({}: UserSearchProps) {
     const [text, setText] = useState('');
-    const [users, setUsers] = useState<User[]>([]);
-    const [loading, setLoading] = useState(false);
+    const githubContext = useContext(GithubContext);
+    
+    if (!githubContext) {
+        return <p>Erro ao carregar contexto do GitHub</p>;
+    }
+
+    const { users, searchUsers, clearUsers, loading } = githubContext;
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setText(e.target.value);
     };
 
-    const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
         if (text === '') {
-            setAlert('Please enter something', 'error');
+            alert('Please enter something');
         } else {
-            setLoading(true);
-            try {
-                const response = await api.get(`/search/users?q=${text}`);
-                console.log('Dados retornados pela API:', response.data.items);
-                setUsers(response.data.items);
-                setLoading(false);
-            } catch (error) {
-                console.error('Erro ao buscar dados do GitHub', error);
-                setLoading(false);
-            }
+            searchUsers(text);
             setText('');
         }
-    };
-
-    const clearUsers = () => {
-        setUsers([]);
     };
 
     return (

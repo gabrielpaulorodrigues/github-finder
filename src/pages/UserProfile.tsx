@@ -1,33 +1,23 @@
 import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { api } from "../services/api";
-
-interface User {
-    login: string;
-    avatar_url: string;
-    name: string;
-    bio: string;
-}
+import { useContext, useEffect } from 'react';
+import { GithubContext } from '../context/GithubContext';
 
 export function UserProfile() {
+
     const { login } = useParams<{ login: string }>();
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
+
+    const githubContext = useContext(GithubContext);
+
+    if (!githubContext) {
+        return <p>Erro ao carregar o contexto do Github</p>;
+    }
+    const { user, loading, getUser } = githubContext;
 
     useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await api.get(`/users/${login}`);
-                setUser(response.data);
-                setLoading(false);
-            } catch (error) {
-                console.error('Erro ao buscar dados do GitHub', error);
-                setLoading(false);
-            }
-        };
-
-        fetchUser();
-    }, [login]);
+        if (login) {
+            getUser(login);
+        }
+    }, []);
 
     if (loading) {
         return <p>Carregando...</p>;
@@ -39,9 +29,11 @@ export function UserProfile() {
 
     return (
         <div>
-            <h1>{user.name}</h1>
+            <h1>Login: {user.login}</h1>
+            <h1>Nome: {user.name}</h1>
             <img src={user.avatar_url} alt="Profile" />
-            <p>{user.bio}</p>
+            <p>Bio: {user.bio}</p>
+            
         </div>
     );
 }

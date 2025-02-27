@@ -1,13 +1,10 @@
-import { useState } from "react";
+
+import { useAlert } from "../../hooks/useAlert";
 import { UserSearch } from "./components/UserSearch";
 
 export function Home() {
-    const [alert, setAlertState] = useState<{ msg: string; type: string } | null>(null);
 
-    function setAlert(msg: string, type: string) {
-        setAlertState({ msg, type });
-        setTimeout(() => setAlertState(null), 3000);
-    }
+    const { alert, setAlert } = useAlert();
 
     return (
         <div>
